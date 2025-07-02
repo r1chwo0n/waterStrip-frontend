@@ -17,7 +17,7 @@ export const loginWithGoogle = async () => {
   });
 
   const data = response.data as { exists: boolean };
-  
+
   if (data.exists) {
     const userInfo = await api.get(`/api/users/${googleId}`);
     return userInfo.data; // return user data
@@ -55,6 +55,8 @@ export const signupWithGoogle = async (type: "researcher" | "regular") => {
   });
 
   if (!createResponse.ok) {
+    const errorText = await createResponse.text();
+    console.error("Failed to create user:", errorText);
     throw new Error("failed_to_create_user");
   }
 
