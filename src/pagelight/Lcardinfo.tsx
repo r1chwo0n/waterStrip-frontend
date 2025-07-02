@@ -8,7 +8,7 @@ import { auth } from "../firebase";
 import { Link } from "react-router-dom";
 import { FaLockOpen, FaLock } from "react-icons/fa";
 // import axios from "axios";
-import { apiFetch } from '../api'
+import { apiFetch } from "../api";
 
 interface ColorScaleSet {
   colors: string[];
@@ -150,20 +150,17 @@ const Lcardinfo: React.FC = () => {
     if (u_id && stripId) {
       const checkAndPostInitialStatus = async () => {
         try {
-          // ลอง GET status ก่อน
-          const getResponse = await apiFetch(
+          const getResult = await apiFetch(
             `/api/strip-status/${u_id}/${stripId}`
           );
-          const getResult = await getResponse.json();
 
-          if (getResponse.ok && getResult.status) {
+          if (getResult.status) {
             console.log("Status already exists:", getResult.status);
-            setIsPrivate(getResult.status === "private"); // ตั้งค่าตามสถานะที่ดึงมา
-            return; // ไม่ต้อง post ซ้ำ
+            setIsPrivate(getResult.status === "private");
+            return;
           }
 
-          // ถ้ายังไม่มี status นี้ → POST เพื่อสร้างใหม่
-          const postResponse = await apiFetch(`/api/strip-status`, {
+          const postResult = await apiFetch(`/api/strip-status`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -175,14 +172,8 @@ const Lcardinfo: React.FC = () => {
             }),
           });
 
-          const postResult = await postResponse.json();
-
-          if (postResponse.ok) {
-            console.log("Initial private status saved:", postResult);
-            setIsPrivate(true); // ตั้งค่าเริ่มต้นเป็น private
-          } else {
-            console.error("Initial save failed:", postResult.error);
-          }
+          console.log("Initial private status saved:", postResult);
+          setIsPrivate(true);
         } catch (error) {
           console.error("Unexpected error checking/setting status:", error);
         }
