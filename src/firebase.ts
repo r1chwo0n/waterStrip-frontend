@@ -1,14 +1,19 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+} from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC4Ti5OLRkhqOxaBbBRtbCRXl265kIAjhM",
-  authDomain: "aquality-23a89.firebaseapp.com",
-  projectId: "aquality-23a89",
-  storageBucket: "aquality-23a89.firebasestorage.app",
-  messagingSenderId: "745648763490",
-  appId: "1:745648763490:web:91b30330a2a64dcd39973b",
-  measurementId: "G-9NLY5TVEFJ",
+  apiKey: "AIzaSyAQ_i5bgYjTdD7WTyPJK4MIHWTVpkT9Tdk",
+  authDomain: "waterstrip-frontend.firebaseapp.com",
+  projectId: "waterstrip-frontend",
+  storageBucket: "waterstrip-frontend.firebasestorage.app",
+  messagingSenderId: "900978134719",
+  appId: "1:900978134719:web:c2386ff566e8e141a7400a",
+  measurementId: "G-VXCGEXX1YJ",
 };
 
 // Initialize Firebase
