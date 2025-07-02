@@ -5,6 +5,7 @@ import { IoIosWarning } from "react-icons/io";
 import { FaCheck } from "react-icons/fa6";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
+import { apiFetch } from "../api";
 
 export default function PermissionPage() {
   const [name, setName] = useState("");
@@ -25,7 +26,7 @@ export default function PermissionPage() {
       setUid(userId);
 
       try {
-        const response = await fetch(`/api/users/${userId}`, { method: "GET" });
+        const response = await apiFetch(`/api/users/${userId}`, { method: "GET" });
         if (!response.ok) throw new Error("Failed to fetch user");
 
         const userData = await response.json();
@@ -56,7 +57,7 @@ export default function PermissionPage() {
     setError("");
 
     try {
-      const response = await fetch(`/api/users/${uid}`, {
+      const response = await apiFetch(`/api/users/${uid}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ u_name: name }),

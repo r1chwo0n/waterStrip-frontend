@@ -9,6 +9,7 @@ import { StripDataProvider } from "../contexts/StripDataContext";
 import Navbar from "../component/Navbar/Navbar";
 import { UserNav, AuthButtons } from "../component/Navbar/RightNav/UserNavAuth";
 import AppUser from "../component/Types/AppUser";
+import { apiFetch } from "../api";
 
 const FirstPage = () => {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -29,7 +30,7 @@ const FirstPage = () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         try {
-          const res = await fetch(`/api/users/${currentUser.uid}`);
+          const res = await apiFetch(`/api/users/${currentUser.uid}`);
           if (res.ok) {
             const userData = await res.json();
             sessionStorage.setItem("userId", userData.u_id);

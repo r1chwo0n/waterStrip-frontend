@@ -1,8 +1,8 @@
+import { apiFetch } from "../api";
 import React, { useState, useEffect, useRef } from "react";
 import { FaLocationCrosshairs } from "react-icons/fa6";
 import { FaPaperclip } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import imageCompression from "browser-image-compression";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
@@ -39,11 +39,10 @@ const Ladd: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch brands from API
-    axios
-      .get<{ b_id: number; b_name: string }[]>("/api/brands")
-      .then((response) => {
-        setBrands(response.data);
+    // Fetch brands from API using apiFetch
+    apiFetch("/api/brands")
+      .then((data: { b_id: number; b_name: string }[]) => {
+        setBrands(data);
       })
       .catch((error) => {
         console.error("Error fetching brands:", error);
@@ -52,7 +51,6 @@ const Ladd: React.FC = () => {
     // Clear location when page is refreshed
     window.addEventListener("beforeunload", resetState);
 
-    // Check for location in localStorage and sessionStorage
     const storedLocation =
       localStorage.getItem("selectedLocation") ||
       sessionStorage.getItem("selectedLocation");
@@ -61,7 +59,6 @@ const Ladd: React.FC = () => {
       try {
         const parsedLocation = JSON.parse(storedLocation);
 
-        // Ensure the location object has lat and lng
         if (
           parsedLocation &&
           parsedLocation.lat !== undefined &&
@@ -69,24 +66,18 @@ const Ladd: React.FC = () => {
         ) {
           const latDMS = toDMS(parsedLocation.lat, true);
           const lngDMS = toDMS(parsedLocation.lng, false);
-
-          // Update state with stored location
           setLocation(`${latDMS}, ${lngDMS}`);
           setIsLocationSelected(true);
         } else {
-          // If stored location is invalid, reset everything
           resetState();
         }
       } catch (error) {
-        // If parsing fails, reset everything
         resetState();
       }
     } else {
-      // No location stored, reset everything
       resetState();
     }
 
-    // Cleanup event listener
     return () => {
       window.removeEventListener("beforeunload", resetState);
     };
@@ -266,22 +257,24 @@ const Ladd: React.FC = () => {
       };
 
       try {
-        const response = await axios.post("/api/strips", data, {
+        const responseData = await apiFetch("/strips", {
+          method: "POST",
+          body: JSON.stringify(data),
           headers: {
             "Content-Type": "application/json",
           },
         });
 
-        const responseData = response.data as {
+        const { data: stripData } = responseData as {
           msg: string;
           data: { s_id: number };
         };
 
-        if (response.status === 201 && responseData.data?.s_id) {
-          const stripId = responseData.data.s_id;
+        if (stripData?.s_id) {
+          const stripId = stripData.s_id;
 
           try {
-            await axios.get(`/api/strips/predict/${stripId}`);
+            await apiFetch(`/strips/predict/${stripId}`);
           } catch (predictError) {
             console.error("Prediction failed:", predictError);
           }

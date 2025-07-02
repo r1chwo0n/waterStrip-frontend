@@ -16,6 +16,7 @@ import MapNavControls from "../component/Navbar/RightNav/MapNavControls";
 import AppUser from "../component/Types/AppUser";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
+import { apiFetch } from "../api";
 
 let DefaultIcon = L.icon({
   iconUrl: icon,
@@ -141,7 +142,7 @@ function Panteefirstpage() {
         if (selectedBrand) params.append("brand", selectedBrand);
         if (selectedQuality) params.append("quality", selectedQuality);
 
-        const response = await fetch(
+        const response = await apiFetch(
           `/api/strip-status/public?${params.toString()}`
         );
         const data: StripStatusResponse[] = await response.json();
@@ -250,7 +251,7 @@ function Panteefirstpage() {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         try {
-          const res = await fetch(`/api/users/${currentUser.uid}`);
+          const res = await apiFetch(`/api/users/${currentUser.uid}`);
           if (res.ok) {
             const userData = await res.json();
             sessionStorage.setItem("userId", userData.u_id);

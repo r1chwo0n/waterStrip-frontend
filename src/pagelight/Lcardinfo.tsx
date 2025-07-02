@@ -8,6 +8,7 @@ import { auth } from "../firebase";
 import { Link } from "react-router-dom";
 import { FaLockOpen, FaLock } from "react-icons/fa";
 // import axios from "axios";
+import { apiFetch } from '../api'
 
 interface ColorScaleSet {
   colors: string[];
@@ -63,7 +64,7 @@ const Lcardinfo: React.FC = () => {
     const fetchData = async () => {
       try {
         // PATCH เพื่ออัปเดตค่าคุณภาพก่อน
-        const patchResponse = await fetch(`/api/strips/quality/${stripId}`, {
+        const patchResponse = await apiFetch(`/api/strips/quality/${stripId}`, {
           method: "PATCH",
         });
         if (!patchResponse.ok) throw new Error("Failed to PATCH data");
@@ -71,7 +72,7 @@ const Lcardinfo: React.FC = () => {
         console.log("PATCH Request Successful"); // Log here to see if PATCH was successful
 
         // จากนั้นค่อย GET ข้อมูลใหม่
-        const response = await fetch(`/api/strips/${stripId}`);
+        const response = await apiFetch(`/api/strips/${stripId}`);
         if (!response.ok) throw new Error("Failed to fetch data");
 
         const data = await response.json();
@@ -150,7 +151,7 @@ const Lcardinfo: React.FC = () => {
       const checkAndPostInitialStatus = async () => {
         try {
           // ลอง GET status ก่อน
-          const getResponse = await fetch(
+          const getResponse = await apiFetch(
             `/api/strip-status/${u_id}/${stripId}`
           );
           const getResult = await getResponse.json();
@@ -162,7 +163,7 @@ const Lcardinfo: React.FC = () => {
           }
 
           // ถ้ายังไม่มี status นี้ → POST เพื่อสร้างใหม่
-          const postResponse = await fetch(`/api/strip-status`, {
+          const postResponse = await apiFetch(`/api/strip-status`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -198,7 +199,7 @@ const Lcardinfo: React.FC = () => {
     setIsPrivate(newStatus);
 
     try {
-      const response = await fetch(`/api/strip-status`, {
+      const response = await apiFetch(`/api/strip-status`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

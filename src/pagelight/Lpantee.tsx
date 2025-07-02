@@ -13,6 +13,7 @@ import { FaLocationCrosshairs } from "react-icons/fa6";
 import L from "leaflet";
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import { apiFetch } from "../api";
 
 let DefaultIcon = L.icon({
   iconUrl: icon,
@@ -149,11 +150,11 @@ function Pantee() {
       try {
         // Fetch strip data
 
-        const stripsResponse = await fetch('/api/strips');
+        const stripsResponse = await apiFetch('/api/strips');
         const stripsData = await stripsResponse.json();
 
         // Fetch brand data
-        const brandResponse = await fetch('/api/brands');
+        const brandResponse = await apiFetch('/api/brands');
         const brandData = await brandResponse.json();
 
         // Map the strip data and link it with the corresponding brand

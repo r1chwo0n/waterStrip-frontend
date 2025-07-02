@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import Card from "../component/card";
 import { BiArrowToLeft } from "react-icons/bi";
 import { MdKeyboardArrowLeft, MdOutlineChevronRight } from "react-icons/md";
-import axios from "axios";
 import { logout } from "../oauth/auth";
 import Navbar from "../component/Navbar/Navbar";
 import HomeNavControls from "../component/Navbar/RightNav/HomeNavControls";
 import AppUser from "../component/Types/AppUser";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
+import { api, apiFetch } from "../api";
 
 type User = {
   u_email: string;
@@ -131,8 +131,8 @@ const Lhome: React.FC = () => {
 
     const fetchUserData = async () => {
       try {
-        const response = await axios.get<User>(`/api/users/${storedUserId}`);
-        const userData = response.data;
+        const userData = (await apiFetch(`/api/users/${storedUserId}`)) as User;
+
         if (userData?.u_name) {
           setUsername(userData.u_name);
         } else {
@@ -169,8 +169,8 @@ const Lhome: React.FC = () => {
 
       const stripsUrl = `/api/strips/card/${storedUserId}?${queryParams.toString()}`;
       const [stripsRes, brandsRes] = await Promise.all([
-        axios.get<any[]>(stripsUrl),
-        axios.get<any[]>("/api/brands"),
+        api.get<any[]>(stripsUrl),
+        api.get<any[]>("/api/brands"),
       ]);
 
       const bandsMap = new Map(
@@ -234,7 +234,9 @@ const Lhome: React.FC = () => {
 
     try {
       // Call your API to delete the card
-      await axios.delete(`/api/strips/${cardToDelete}`);
+      await apiFetch(`/api/strips/${cardToDelete}`, {
+        method: "DELETE",
+      });
 
       // Update the state by removing the deleted card
       const updatedCards = allCards.filter(
@@ -351,7 +353,7 @@ const Lhome: React.FC = () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         try {
-          const res = await fetch(`/api/users/${currentUser.uid}`);
+          const res = await apiFetch(`/api/users/${currentUser.uid}`);
           if (res.ok) {
             const userData = await res.json();
             sessionStorage.setItem("userId", userData.u_id);
