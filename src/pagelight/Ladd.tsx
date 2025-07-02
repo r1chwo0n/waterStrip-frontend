@@ -274,7 +274,7 @@ const Ladd: React.FC = () => {
           const stripId = stripData.s_id;
 
           try {
-            await apiFetch(`/strips/predict/${stripId}`);
+            await apiFetch(`/api/strips/predict/${stripId}`);
           } catch (predictError) {
             console.error("Prediction failed:", predictError);
           }
