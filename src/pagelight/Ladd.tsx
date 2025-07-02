@@ -257,7 +257,7 @@ const Ladd: React.FC = () => {
       };
 
       try {
-        const responseData = await apiFetch("/strips", {
+        const responseData = await apiFetch("/api/strips", {
           method: "POST",
           body: JSON.stringify(data),
           headers: {
