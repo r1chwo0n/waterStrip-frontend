@@ -131,7 +131,9 @@ const Lhome: React.FC = () => {
 
     const fetchUserData = async () => {
       try {
-        const userData = (await apiFetch(`/api/users/${storedUserId}`)) as User;
+
+        const response = await apiFetch(`/api/users/${storedUserId}`);
+        const userData: User = await response.json(); 
 
         if (userData?.u_name) {
           setUsername(userData.u_name);

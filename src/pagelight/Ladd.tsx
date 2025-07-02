@@ -41,11 +41,9 @@ const Ladd: React.FC = () => {
   useEffect(() => {
     // Fetch brands from API using apiFetch
     apiFetch("/api/brands")
+      .then((res) => res.json()) // ต้อง .json() ตรงนี้
       .then((data: { b_id: number; b_name: string }[]) => {
         setBrands(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching brands:", error);
       });
 
     // Clear location when page is refreshed
@@ -257,13 +255,15 @@ const Ladd: React.FC = () => {
       };
 
       try {
-        const responseData = await apiFetch("/api/strips", {
+        const res = await apiFetch("/api/strips", {
           method: "POST",
           body: JSON.stringify(data),
           headers: {
             "Content-Type": "application/json",
           },
         });
+
+        const responseData = await res.json();
 
         const { data: stripData } = responseData as {
           msg: string;
