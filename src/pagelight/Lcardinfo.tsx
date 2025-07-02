@@ -154,9 +154,9 @@ const Lcardinfo: React.FC = () => {
           const getResponse = await apiFetch(
             `/api/strip-status/${u_id}/${stripId}`
           );
-          const getResult = await getResponse.json();
-
-          if (getResponse.ok && getResult.status) {
+          
+          if (getResponse.ok) {
+            const getResult = await getResponse.json();
             console.log("Status already exists:", getResult.status);
             setIsPrivate(getResult.status === "private"); // ตั้งค่าตามสถานะที่ดึงมา
             return; // ไม่ต้อง post ซ้ำ
