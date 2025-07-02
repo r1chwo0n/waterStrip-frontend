@@ -8,6 +8,7 @@ import * as turf from "@turf/turf";
 import type { Feature, FeatureCollection, Polygon, MultiPolygon } from "geojson";
 import { dmsToDecimal } from "../../utils/dmsToDecimal.ts"; // Assuming you have a utility function for DMS conversion
 import { DateAnalyzer } from "../Convertor/DateAnalyzer"; 
+import { apiFetch } from "../../api.ts";
 
 const thailandProvincesGeoJSON = rawGeoJson as FeatureCollection;
 const DEFAULT_POSITION: [number, number] = [18.796143, 98.979263]; // Chiang Mai
@@ -43,7 +44,7 @@ const MapView = () => {
   useEffect(() => {
     const fetchPlacesData = async () => {
       try {
-        const stripsResponse = await fetch("/api/strips");
+        const stripsResponse = await apiFetch("/api/strips");
         const stripsData = await stripsResponse.json();
         const ThisMontStrip = DateAnalyzer(stripsData);
         setStrips(ThisMontStrip);

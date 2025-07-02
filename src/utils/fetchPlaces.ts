@@ -1,7 +1,8 @@
+import { apiFetch } from "../api";
 import { dmsToDecimal } from "./dmsToDecimal";
 
 export async function fetchPlaces() {
-  const response = await fetch("/api/strip-status/public");
+  const response = await apiFetch("/api/strip-status/public");
   const data = await response.json();
 
   return data.map((strip: any) => ({

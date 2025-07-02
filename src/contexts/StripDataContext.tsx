@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { apiFetch } from "../api";
 
 interface Strip {
   s_date: string;
@@ -22,7 +23,7 @@ export const StripDataProvider = ({ children }: { children: React.ReactNode }) =
      console.log("useEffect: Fetching strips...");
     const fetchStripData = async () => {
       try {
-        const res = await fetch("/api/strips");
+        const res = await apiFetch("/api/strips");
         const data = await res.json();
         console.log("Fetched strip data:", data);
         setStripData(data);

@@ -1,7 +1,8 @@
 // oauth/auth.ts
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebase";
-import axios from "axios";
+// import axios from "axios";
+import { api, apiFetch } from "../api";
 
 export const loginWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
@@ -11,14 +12,14 @@ export const loginWithGoogle = async () => {
   const user = result.user;
   const googleId = user.uid;
 
-  const response = await axios.post("/api/users/check-user", {
+  const response = await api.post("/api/users/check-user", {
     u_id: googleId,
   });
 
   const data = response.data as { exists: boolean };
   
   if (data.exists) {
-    const userInfo = await axios.get(`/api/users/${googleId}`);
+    const userInfo = await api.get(`/api/users/${googleId}`);
     return userInfo.data; // return user data
   } else {
     return null; // user doesn't exist, ask to sign up
@@ -33,7 +34,7 @@ export const signupWithGoogle = async (type: "researcher" | "regular") => {
   const user = result.user;
   const googleId = user.uid;
 
-  const checkResponse = await axios.post("/api/users/check-user", {
+  const checkResponse = await api.post("/api/users/check-user", {
     u_id: googleId,
   });
 
@@ -42,7 +43,7 @@ export const signupWithGoogle = async (type: "researcher" | "regular") => {
     throw new Error("already_registered");
   }
 
-  const createResponse = await fetch("/api/users", {
+  const createResponse = await apiFetch("/api/users", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
