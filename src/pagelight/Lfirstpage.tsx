@@ -30,14 +30,9 @@ const FirstPage = () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         try {
-          const res = await apiFetch(`/api/users/${currentUser.uid}`);
-          if (res.ok) {
-            const userData = await res.json();
-            sessionStorage.setItem("userId", userData.u_id);
-            setUser(userData);
-          } else {
-            setUser(null);
-          }
+          const userData = await apiFetch(`/api/users/${currentUser.uid}`); // ✅ ไม่ต้อง .json()
+          sessionStorage.setItem("userId", userData.u_id);
+          setUser(userData);
         } catch (error) {
           console.error("Error fetching user data:", error);
           setUser(null);
@@ -46,6 +41,7 @@ const FirstPage = () => {
         setUser(null);
       }
     });
+
     return () => unsubscribe();
   }, []);
 
