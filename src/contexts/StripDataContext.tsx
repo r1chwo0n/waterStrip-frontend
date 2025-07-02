@@ -16,15 +16,18 @@ const StripDataContext = createContext<StripDataContextType>({ stripData: [] });
 
 export const useStripData = () => useContext(StripDataContext);
 
-export const StripDataProvider = ({ children }: { children: React.ReactNode }) => {
+export const StripDataProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [stripData, setStripData] = useState<Strip[]>([]);
 
   useEffect(() => {
-     console.log("useEffect: Fetching strips...");
+    console.log("useEffect: Fetching strips...");
     const fetchStripData = async () => {
       try {
-        const res = await apiFetch("/api/strips");
-        const data = await res.json();
+        const data = await apiFetch("/api/strips"); // ✅ แก้ตรงนี้
         console.log("Fetched strip data:", data);
         setStripData(data);
       } catch (err) {
