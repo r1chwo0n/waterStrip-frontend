@@ -175,13 +175,13 @@ const Lcardinfo: React.FC = () => {
             }),
           });
 
-          const postResult = await postResponse.json();
-
           if (postResponse.ok) {
+            const postResult = await postResponse.json();
             console.log("Initial private status saved:", postResult);
-            setIsPrivate(true); // ตั้งค่าเริ่มต้นเป็น private
+            setIsPrivate(true);
           } else {
-            console.error("Initial save failed:", postResult.error);
+            const errorText = await postResponse.text();
+            console.error("Initial save failed:", errorText);
           }
         } catch (error) {
           console.error("Unexpected error checking/setting status:", error);
@@ -211,12 +211,12 @@ const Lcardinfo: React.FC = () => {
         }),
       });
 
-      const result = await response.json();
-
       if (response.ok) {
+        const result = await response.json();
         console.log("Status updated successfully:", result);
       } else {
-        console.error("Status update failed:", result.error);
+        const errorText = await response.text();
+        console.error("Status update failed:", errorText);
       }
     } catch (error) {
       console.error("Unexpected error on patch:", error);
