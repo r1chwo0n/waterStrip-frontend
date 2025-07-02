@@ -55,7 +55,8 @@ const MapView = () => {
   useEffect(() => {
     const fetchPlacesData = async () => {
       try {
-        const stripsData = await apiFetch("/api/strips"); // ✅ ไม่ต้อง .json()
+        const stripsResponse = await apiFetch("/api/strips");
+        const stripsData = await stripsResponse.json();
         const ThisMontStrip = DateAnalyzer(stripsData);
         setStrips(ThisMontStrip);
         console.log("Fetched strips data:", ThisMontStrip);

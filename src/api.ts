@@ -24,5 +24,5 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
     throw new Error(`API Error: ${errorMessage}`)
   }
 
-  return response.json()
+  return response
 }

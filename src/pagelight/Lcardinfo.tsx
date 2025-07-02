@@ -64,16 +64,20 @@ const Lcardinfo: React.FC = () => {
     const fetchData = async () => {
       try {
         // PATCH เพื่ออัปเดตค่าคุณภาพก่อน
-        await apiFetch(`/api/strips/quality/${stripId}`, {
+        const patchResponse = await apiFetch(`/api/strips/quality/${stripId}`, {
           method: "PATCH",
         });
+        if (!patchResponse.ok) throw new Error("Failed to PATCH data");
 
-        console.log("PATCH Request Successful");
+        console.log("PATCH Request Successful"); // Log here to see if PATCH was successful
 
         // จากนั้นค่อย GET ข้อมูลใหม่
-        const data = await apiFetch(`/api/strips/${stripId}`);
+        const response = await apiFetch(`/api/strips/${stripId}`);
+        if (!response.ok) throw new Error("Failed to fetch data");
 
-        console.log("Fetched Data:", data);
+        const data = await response.json();
+
+        console.log("Fetched Data:", data); // Log the fetched data to see if updated correctly
 
         setStripBrand(data.b_name);
         setAnalyzeDate(data.s_date);
@@ -98,7 +102,7 @@ const Lcardinfo: React.FC = () => {
             name: param.p_name,
             unit: param.p_unit,
             value: param.sp_value,
-            normalRange: [param.p_min, param.p_max],
+            normalRange: [param.p_min, param.p_max], // ใช้ค่าที่มาจาก backend หรือ default
           }));
         setMeasurements(measurements);
       } catch (error) {
@@ -146,17 +150,20 @@ const Lcardinfo: React.FC = () => {
     if (u_id && stripId) {
       const checkAndPostInitialStatus = async () => {
         try {
-          const getResult = await apiFetch(
+          // ลอง GET status ก่อน
+          const getResponse = await apiFetch(
             `/api/strip-status/${u_id}/${stripId}`
           );
+          const getResult = await getResponse.json();
 
-          if (getResult.status) {
+          if (getResponse.ok && getResult.status) {
             console.log("Status already exists:", getResult.status);
-            setIsPrivate(getResult.status === "private");
-            return;
+            setIsPrivate(getResult.status === "private"); // ตั้งค่าตามสถานะที่ดึงมา
+            return; // ไม่ต้อง post ซ้ำ
           }
 
-          const postResult = await apiFetch(`/api/strip-status`, {
+          // ถ้ายังไม่มี status นี้ → POST เพื่อสร้างใหม่
+          const postResponse = await apiFetch(`/api/strip-status`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -168,8 +175,14 @@ const Lcardinfo: React.FC = () => {
             }),
           });
 
-          console.log("Initial private status saved:", postResult);
-          setIsPrivate(true);
+          const postResult = await postResponse.json();
+
+          if (postResponse.ok) {
+            console.log("Initial private status saved:", postResult);
+            setIsPrivate(true); // ตั้งค่าเริ่มต้นเป็น private
+          } else {
+            console.error("Initial save failed:", postResult.error);
+          }
         } catch (error) {
           console.error("Unexpected error checking/setting status:", error);
         }
@@ -186,7 +199,7 @@ const Lcardinfo: React.FC = () => {
     setIsPrivate(newStatus);
 
     try {
-      const result = await apiFetch(`/api/strip-status`, {
+      const response = await apiFetch(`/api/strip-status`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -198,7 +211,13 @@ const Lcardinfo: React.FC = () => {
         }),
       });
 
-      console.log("Status updated successfully:", result);
+      const result = await response.json();
+
+      if (response.ok) {
+        console.log("Status updated successfully:", result);
+      } else {
+        console.error("Status update failed:", result.error);
+      }
     } catch (error) {
       console.error("Unexpected error on patch:", error);
     }

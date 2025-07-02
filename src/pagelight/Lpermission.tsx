@@ -59,11 +59,13 @@ export default function PermissionPage() {
     setError("");
 
     try {
-      await apiFetch(`/api/users/${uid}`, {
+      const response = await apiFetch(`/api/users/${uid}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ u_name: name }),
       });
+
+      if (!response.ok) throw new Error("Failed to update name");
 
       setSubmitted(true);
       sessionStorage.setItem("username", name);

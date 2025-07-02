@@ -27,7 +27,8 @@ export const StripDataProvider = ({
     console.log("useEffect: Fetching strips...");
     const fetchStripData = async () => {
       try {
-        const data = await apiFetch("/api/strips"); // ✅ แก้ตรงนี้
+        const res = await apiFetch("/api/strips");
+        const data = await res.json();
         console.log("Fetched strip data:", data);
         setStripData(data);
       } catch (err) {
