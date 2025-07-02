@@ -43,7 +43,8 @@ export const signupWithGoogle = async (type: "researcher" | "regular") => {
     throw new Error("already_registered");
   }
 
-  const createResponse = await apiFetch("/api/users", {
+  // ✅ apiFetch จะ return json อยู่แล้ว
+  const userData = await apiFetch("/api/users", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -54,14 +55,7 @@ export const signupWithGoogle = async (type: "researcher" | "regular") => {
     }),
   });
 
-  if (!createResponse.ok) {
-    const errorText = await createResponse.text();
-    console.error("Failed to create user:", errorText);
-    throw new Error("failed_to_create_user");
-  }
-
-  const userData = await createResponse.json();
-  return userData.data; // return newly created user data
+  return userData.data; // ✅ ไม่ต้อง .json()
 };
 
 export const logout = async () => {
