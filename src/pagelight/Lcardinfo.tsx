@@ -64,20 +64,16 @@ const Lcardinfo: React.FC = () => {
     const fetchData = async () => {
       try {
         // PATCH เพื่ออัปเดตค่าคุณภาพก่อน
-        const patchResponse = await apiFetch(`/api/strips/quality/${stripId}`, {
+        await apiFetch(`/api/strips/quality/${stripId}`, {
           method: "PATCH",
         });
-        if (!patchResponse.ok) throw new Error("Failed to PATCH data");
 
-        console.log("PATCH Request Successful"); // Log here to see if PATCH was successful
+        console.log("PATCH Request Successful");
 
         // จากนั้นค่อย GET ข้อมูลใหม่
-        const response = await apiFetch(`/api/strips/${stripId}`);
-        if (!response.ok) throw new Error("Failed to fetch data");
+        const data = await apiFetch(`/api/strips/${stripId}`);
 
-        const data = await response.json();
-
-        console.log("Fetched Data:", data); // Log the fetched data to see if updated correctly
+        console.log("Fetched Data:", data);
 
         setStripBrand(data.b_name);
         setAnalyzeDate(data.s_date);
@@ -102,7 +98,7 @@ const Lcardinfo: React.FC = () => {
             name: param.p_name,
             unit: param.p_unit,
             value: param.sp_value,
-            normalRange: [param.p_min, param.p_max], // ใช้ค่าที่มาจาก backend หรือ default
+            normalRange: [param.p_min, param.p_max],
           }));
         setMeasurements(measurements);
       } catch (error) {
@@ -190,7 +186,7 @@ const Lcardinfo: React.FC = () => {
     setIsPrivate(newStatus);
 
     try {
-      const response = await apiFetch(`/api/strip-status`, {
+      const result = await apiFetch(`/api/strip-status`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -202,13 +198,7 @@ const Lcardinfo: React.FC = () => {
         }),
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        console.log("Status updated successfully:", result);
-      } else {
-        console.error("Status update failed:", result.error);
-      }
+      console.log("Status updated successfully:", result);
     } catch (error) {
       console.error("Unexpected error on patch:", error);
     }
