@@ -7,6 +7,7 @@ import imageCompression from "browser-image-compression";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
 import ImageEditor from "./ImageEditor"; // Import the new component
+import { dmsToDecimal } from "../utils/dmsToDecimal"; // หรือ path ที่ถูกต้องของคุณ
 
 // Utility function to convert decimal to DMS
 const toDMS = (decimal: number, isLat: boolean = true) => {
@@ -225,8 +226,8 @@ const Ladd: React.FC = () => {
   const handleAnalyze = async () => {
     if (isLocationSelected && selectedFile && selectedBrandId) {
       const locationParts = location.split(", ");
-      const latitude = locationParts[0];
-      const longitude = locationParts[1];
+      const latitude = dmsToDecimal(locationParts[0]);
+      const longitude = dmsToDecimal(locationParts[1]);
 
       if (!userId) {
         console.error("User ID not found. Please log in.");
