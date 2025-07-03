@@ -1,4 +1,4 @@
-import { apiFetch } from "../api";
+import { api, apiFetch } from "../api";
 import React, { useState, useEffect, useRef } from "react";
 import { FaLocationCrosshairs } from "react-icons/fa6";
 import { FaPaperclip } from "react-icons/fa";
@@ -255,31 +255,34 @@ const Ladd: React.FC = () => {
       };
 
       try {
-        const res = await apiFetch("/api/strips", {
-          method: "POST",
-          body: JSON.stringify(data),
+        const response = await api.post("/api/strips", data, {
           headers: {
             "Content-Type": "application/json",
           },
         });
 
-        const responseData = await res.json();
-
-        const { data: stripData } = responseData as {
+        const responseData = response.data as {
           msg: string;
           data: { s_id: number };
         };
 
-        if (stripData?.s_id) {
-          const stripId = stripData.s_id;
+        if (response.status === 201 && responseData.data?.s_id) {
+          const stripId = responseData.data.s_id;
 
           try {
-            await apiFetch(`/api/strips/predict/${stripId}`);
+            const predictRes = await api.get(`/api/strips/predict/${stripId}`);
+
+            if (predictRes.status === 200) {
+              navigate(`/cardinfo/${stripId}`);
+            } else {
+              console.error(
+                "Prediction API responded with non-200 status:",
+                predictRes.status
+              );
+            }
           } catch (predictError) {
             console.error("Prediction failed:", predictError);
           }
-
-          navigate(`/cardinfo/${stripId}`);
         } else {
           console.error("Error: s_id is undefined", responseData);
         }
