@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import rawGeoJson from "./thailand-provinces.json";
 import { getProvinceFromLatLng } from "../Convertor/ProvinceAnalyzer";
-import { toDecimalIfNeeded } from "../../utils/dmsToDecimal";
+import { dmsToDecimal } from "../../utils/dmsToDecimal";
 import { DateAnalyzer } from "../Convertor/DateAnalyzer";
 import { apiFetch } from "../../api";
 
@@ -50,8 +50,8 @@ const ProvinceStatus = () => {
         >();
 
         stripsThisMonth.forEach((strip) => {
-          const lat = toDecimalIfNeeded(strip.s_latitude || "");
-          const lng = toDecimalIfNeeded(strip.s_longitude || "");
+          const lat = dmsToDecimal(strip.s_latitude || "");
+          const lng = dmsToDecimal(strip.s_longitude || "");
           if (isNaN(lat) || isNaN(lng)) return;
 
           const province = getProvinceFromLatLng(lat, lng);

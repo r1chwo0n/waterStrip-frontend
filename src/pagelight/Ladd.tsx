@@ -251,8 +251,8 @@ const Ladd: React.FC = () => {
 
         // 2️⃣ แปลงพิกัดจาก DMS → Decimal
         const locationParts = location.split(", ");
-        const latitude = dmsToDecimal(locationParts[0]);
-        const longitude = dmsToDecimal(locationParts[1]);
+        const latitude = locationParts[0];
+        const longitude = locationParts[1];
 
         // 3️⃣ ส่งทุกอย่างไปยัง backend เพื่อให้มันเรียก ML + Insert DB + Evaluate
         const saveRes = await api.post<StripResponse>("/api/strips", {
