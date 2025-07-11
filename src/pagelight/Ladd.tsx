@@ -187,20 +187,25 @@ const Ladd: React.FC = () => {
 
   // Handler for when editor saves the image
   const handleSaveEditedImage = async (editedImageDataUrl: string) => {
+    setShowImageEditor(false);
+
+    // 👁️‍🗨️ แสดงภาพที่ยังไม่หมุนให้ user ดู
+    setImagePreview(editedImageDataUrl);
+
     try {
-      setShowImageEditor(false);
-      const rotatedDataUrl = await rotateImage90(editedImageDataUrl); // 🔄 หมุน
+      // 🌀 หมุนภาพก่อนอัปโหลด
+      const rotatedDataUrl = await rotateImage90(editedImageDataUrl);
 
-      // อัปเดต preview
-      setImagePreview(rotatedDataUrl);
-
-      // แปลง DataURL → Blob → File
       const response = await fetch(rotatedDataUrl);
       const blob = await response.blob();
-      const file = new File([blob], "rotated.jpg", { type: "image/jpeg" });
-      setSelectedFile(file);
+      const rotatedFile = new File([blob], "rotated-image.jpg", {
+        type: "image/jpeg",
+      });
+
+      // 💾 ใช้ไฟล์ที่หมุนแล้วเก็บไว้สำหรับ upload ต่อ
+      setSelectedFile(rotatedFile);
     } catch (err) {
-      console.error("Error in rotating & saving image:", err);
+      console.error("Error rotating image for upload:", err);
     }
   };
 
