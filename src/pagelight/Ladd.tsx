@@ -8,6 +8,15 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
 import ImageEditor from "./ImageEditor"; // Import the new component
 import { dmsToDecimal } from "../utils/dmsToDecimal"; // หรือ path ที่ถูกต้องของคุณ
+import { uploadToCloudinary } from "../utils/uploadToCloudinary";
+
+type StripResponse = {
+  msg: string;
+  data: {
+    s_id: string;
+    prediction: number;
+  };
+};
 
 // Utility function to convert decimal to DMS
 const toDMS = (decimal: number, isLat: boolean = true) => {
@@ -178,27 +187,20 @@ const Ladd: React.FC = () => {
 
   // Handler for when editor saves the image
   const handleSaveEditedImage = async (editedImageDataUrl: string) => {
-    setImagePreview(editedImageDataUrl);
-    setShowImageEditor(false);
-
-    const response = await fetch(editedImageDataUrl);
-    const blob = await response.blob();
-    const file = new File([blob], "edited-image.jpg", { type: "image/jpeg" });
-    setSelectedFile(file);
-
-    // อัปโหลดไปยัง FastAPI
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const uploadResponse = await api.post("/api/upload/", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      console.log("Upload success:", uploadResponse.data);
+      setShowImageEditor(false);
+      const rotatedDataUrl = await rotateImage90(editedImageDataUrl); // 🔄 หมุน
+
+      // อัปเดต preview
+      setImagePreview(rotatedDataUrl);
+
+      // แปลง DataURL → Blob → File
+      const response = await fetch(rotatedDataUrl);
+      const blob = await response.blob();
+      const file = new File([blob], "rotated.jpg", { type: "image/jpeg" });
+      setSelectedFile(file);
     } catch (err) {
-      console.error("Upload failed:", err);
+      console.error("Error in rotating & saving image:", err);
     }
   };
 
@@ -211,6 +213,7 @@ const Ladd: React.FC = () => {
   function rotateImage90(imageSrc: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const img = new Image();
+      img.crossOrigin = "anonymous"; // ป้องกัน CORS ปัญหา base64 → blob
       img.onload = function () {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
@@ -220,16 +223,14 @@ const Ladd: React.FC = () => {
           return;
         }
 
-        // ปรับขนาด canvas สำหรับการหมุนทวนเข็ม
         canvas.width = img.height;
         canvas.height = img.width;
 
-        // เลื่อน canvas และหมุน -90 องศา
         ctx.translate(0, canvas.height);
         ctx.rotate((-90 * Math.PI) / 180);
         ctx.drawImage(img, 0, 0);
 
-        const rotatedImage = canvas.toDataURL();
+        const rotatedImage = canvas.toDataURL("image/jpeg");
         resolve(rotatedImage);
       };
       img.onerror = reject;
@@ -239,71 +240,30 @@ const Ladd: React.FC = () => {
 
   const handleAnalyze = async () => {
     if (isLocationSelected && selectedFile && selectedBrandId) {
-      const locationParts = location.split(", ");
-      const latitude = dmsToDecimal(locationParts[0]);
-      const longitude = dmsToDecimal(locationParts[1]);
-
-      if (!userId) {
-        console.error("User ID not found. Please log in.");
-        return;
-      }
-
-      localStorage.setItem("stripBrand", selectedBrandId.toString());
-      localStorage.setItem("location", location);
-
-      let rotatedImagePreview = imagePreview;
-      if (imagePreview) {
-        try {
-          rotatedImagePreview = await rotateImage90(imagePreview);
-          localStorage.setItem("uploadedImage", rotatedImagePreview);
-        } catch (err) {
-          console.error("Error rotating image:", err);
-        }
-      }
-
-      const data = {
-        b_id: selectedBrandId,
-        s_latitude: latitude,
-        s_longitude: longitude,
-        u_id: userId,
-        s_url: rotatedImagePreview,
-      };
-
       try {
-        const response = await api.post("/api/strips", data, {
-          headers: {
-            "Content-Type": "application/json",
-          },
+        // 1️⃣ อัปโหลดภาพไปยัง Cloudinary
+        const cloudinaryUrl = await uploadToCloudinary(selectedFile);
+
+        // 2️⃣ แปลงพิกัดจาก DMS → Decimal
+        const locationParts = location.split(", ");
+        const latitude = dmsToDecimal(locationParts[0]);
+        const longitude = dmsToDecimal(locationParts[1]);
+
+        // 3️⃣ ส่งทุกอย่างไปยัง backend เพื่อให้มันเรียก ML + Insert DB + Evaluate
+        const saveRes = await api.post<StripResponse>("/api/strips", {
+          b_id: selectedBrandId,
+          s_latitude: latitude,
+          s_longitude: longitude,
+          u_id: userId,
+          s_url: cloudinaryUrl,
         });
 
-        const responseData = response.data as {
-          msg: string;
-          data: { s_id: number };
-        };
-
-        if (response.status === 201 && responseData.data?.s_id) {
-          const stripId = responseData.data.s_id;
-
-          try {
-            const predictRes = await api.get(`/api/strips/predict/${stripId}`);
-
-            if (predictRes.status === 200) {
-              navigate(`/cardinfo/${stripId}`);
-            } else {
-              console.error(
-                "Prediction API responded with non-200 status:",
-                predictRes.status
-              );
-            }
-          } catch (predictError) {
-            console.error("Prediction failed:", predictError);
-          }
-        } else {
-          console.error("Error: s_id is undefined", responseData);
+        const s_id = saveRes.data?.data?.s_id;
+        if (s_id) {
+          navigate(`/cardinfo/${s_id}`);
         }
-      } catch (error) {
-        console.error("Error in API request:", error);
-        console.log("data : ", data);
+      } catch (err) {
+        console.error("Analyze failed:", err);
       }
     }
   };
