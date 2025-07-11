@@ -148,47 +148,25 @@ const Lcardinfo: React.FC = () => {
 
   useEffect(() => {
     if (u_id && stripId) {
-      const checkAndPostInitialStatus = async () => {
+      const fetchStatus = async () => {
         try {
-          // ลอง GET status ก่อน
-          const getResponse = await apiFetch(
+          const response = await apiFetch(
             `/api/strip-status/${u_id}/${stripId}`
           );
-          const getResult = await getResponse.json();
+          const result = await response.json();
 
-          if (getResponse.ok && getResult.status) {
-            console.log("Status already exists:", getResult.status);
-            setIsPrivate(getResult.status === "private"); // ตั้งค่าตามสถานะที่ดึงมา
-            return; // ไม่ต้อง post ซ้ำ
-          }
-
-          // ถ้ายังไม่มี status นี้ → POST เพื่อสร้างใหม่
-          const postResponse = await apiFetch(`/api/strip-status`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              u_id,
-              s_id: stripId,
-              status: "private",
-            }),
-          });
-
-          const postResult = await postResponse.json();
-
-          if (postResponse.ok) {
-            console.log("Initial private status saved:", postResult);
-            setIsPrivate(true); // ตั้งค่าเริ่มต้นเป็น private
+          if (response.ok && result.status) {
+            console.log("Status:", result.status);
+            setIsPrivate(result.status === "private");
           } else {
-            console.error("Initial save failed:", postResult.error);
+            console.error("Status not found or error:", result);
           }
         } catch (error) {
-          console.error("Unexpected error checking/setting status:", error);
+          console.error("Failed to fetch status:", error);
         }
       };
 
-      checkAndPostInitialStatus();
+      fetchStatus();
     }
   }, [u_id, stripId]);
 
