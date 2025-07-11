@@ -11,7 +11,7 @@ import type {
   Polygon,
   MultiPolygon,
 } from "geojson";
-import { dmsToDecimal } from "../../utils/dmsToDecimal.ts"; // Assuming you have a utility function for DMS conversion
+import { toDecimalIfNeeded } from "../../utils/dmsToDecimal.ts"; // Assuming you have a utility function for DMS conversion
 import { DateAnalyzer } from "../Convertor/DateAnalyzer";
 import { apiFetch } from "../../api.ts";
 
@@ -79,8 +79,8 @@ const MapView = () => {
     const colorCountMap: Record<string, Record<string, number>> = {};
 
     for (const strip of stripsThisMonth) {
-      const lat = dmsToDecimal(strip.s_latitude);
-      const lng = dmsToDecimal(strip.s_longitude);
+      const lat = toDecimalIfNeeded(strip.s_latitude);
+      const lng = toDecimalIfNeeded(strip.s_longitude);
       const color = strip.s_qualitycolor;
 
       const province = getProvinceFromLatLng(

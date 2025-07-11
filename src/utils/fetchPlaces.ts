@@ -1,5 +1,5 @@
 import { apiFetch } from "../api";
-import { dmsToDecimal } from "./dmsToDecimal";
+import { toDecimalIfNeeded } from "./dmsToDecimal";
 
 export async function fetchPlaces() {
   const response = await apiFetch("/api/strip-status/public");
@@ -8,8 +8,8 @@ export async function fetchPlaces() {
   return data.map((strip: any) => ({
     id: strip.s_id,
     location: {
-      lat: dmsToDecimal(strip.s_latitude),
-      lng: dmsToDecimal(strip.s_longitude),
+      lat: toDecimalIfNeeded(strip.s_latitude),
+      lng: toDecimalIfNeeded(strip.s_longitude),
     },
     color: strip.s_qualitycolor,
   }));

@@ -15,3 +15,9 @@ export function dmsToDecimal(dms: string): number {
   }
   return decimal;
 }
+
+export function toDecimalIfNeeded(coord: string | number): number {
+  if (typeof coord === "number") return coord;
+  if (/[°'"]/.test(coord)) return dmsToDecimal(coord);
+  return parseFloat(coord);
+}
