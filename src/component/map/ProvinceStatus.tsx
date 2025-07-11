@@ -31,18 +31,23 @@ interface PublicStrip {
 const geoJson = rawGeoJson as GeoJson;
 
 const ProvinceStatus = () => {
-  const [provinceStatuses, setProvinceStatuses] = useState<ProvinceStatus[]>([]);
+  const [provinceStatuses, setProvinceStatuses] = useState<ProvinceStatus[]>(
+    []
+  );
 
   useEffect(() => {
     const fetchPublicStrips = async () => {
       try {
-        const res = await apiFetch("/api/strips/public"); // ✅ เรียกเฉพาะ public
+        const res = await apiFetch("/api/strip-status/public"); // ✅ เรียกเฉพาะ public
         const data: PublicStrip[] = await res.json();
 
         // Filter strips for this month
         const stripsThisMonth = DateAnalyzer(data);
 
-        const provinceStatusCount = new Map<string, { Good: number; Bad: number }>();
+        const provinceStatusCount = new Map<
+          string,
+          { Good: number; Bad: number }
+        >();
 
         stripsThisMonth.forEach((strip) => {
           const lat = dmsToDecimal(strip.s_latitude || "");
@@ -94,10 +99,15 @@ const ProvinceStatus = () => {
 
   return (
     <div className="fixed top-20 right-5 max-h-[80vh] w-80 overflow-auto bg-white p-4 rounded-lg shadow-lg z-50">
-      <h2 className="text-xl font-bold mb-4">Province Water pH Quality Status (This Month)</h2>
+      <h2 className="text-xl font-bold mb-4">
+        Province Water pH Quality Status (This Month)
+      </h2>
       <ul className="space-y-2">
         {provinceStatuses.map(({ province, status }) => (
-          <li key={province} className={`font-semibold ${statusColors[status]}`}>
+          <li
+            key={province}
+            className={`font-semibold ${statusColors[status]}`}
+          >
             {province}: {status}
           </li>
         ))}
