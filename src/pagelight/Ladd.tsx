@@ -7,7 +7,7 @@ import imageCompression from "browser-image-compression";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
 import ImageEditor from "./ImageEditor"; // Import the new component
-import { dmsToDecimal } from "../utils/dmsToDecimal"; // หรือ path ที่ถูกต้องของคุณ
+// import { dmsToDecimal } from "../utils/dmsToDecimal"; // หรือ path ที่ถูกต้องของคุณ
 import { uploadToCloudinary } from "../utils/uploadToCloudinary";
 
 type StripResponse = {
