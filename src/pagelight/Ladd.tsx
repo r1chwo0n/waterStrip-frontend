@@ -246,6 +246,8 @@ const Ladd: React.FC = () => {
   const handleAnalyze = async () => {
     if (isLocationSelected && selectedFile && selectedBrandId) {
       try {
+
+        navigate("/loading");
         // 1️⃣ อัปโหลดภาพไปยัง Cloudinary
         const cloudinaryUrl = await uploadToCloudinary(selectedFile);
 
