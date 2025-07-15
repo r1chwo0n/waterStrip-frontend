@@ -77,7 +77,7 @@ const MapView = () => {
   useEffect(() => {
     const fetchPlacesData = async () => {
       try {
-        const stripsResponse = await apiFetch("/api/strips");
+        const stripsResponse = await apiFetch("/api/strips/public");
         const stripsData = await stripsResponse.json();
         const ThisMontStrip = DateAnalyzer(stripsData);
         setStrips(ThisMontStrip);
