@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-// import PicScale from "../component/picscale";
 import Scale from "../component/subscale";
 import { useNavigate, useParams } from "react-router-dom";
 import { format } from "date-fns";
@@ -8,7 +7,6 @@ import { auth } from "../firebase";
 import { Link } from "react-router-dom";
 import { FaLockOpen, FaLock } from "react-icons/fa";
 import { apiFetch } from "../api";
-// import axios from "axios";
 
 interface ColorScaleSet {
   colors: string[];
@@ -38,9 +36,6 @@ const Lcardinfo: React.FC = () => {
   const [u_id, setUid] = useState("");
   const [scaleColorSets, setScaleColorSets] = useState<ColorScaleSet[]>([]);
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
-  // const [prediction, setPrediction] = useState<string>("");
-  // const [loading, setLoading] = useState<boolean>(false);
-  // const [error, setError] = useState<string>("");
 
   const formatDate = (isoString?: string) => {
     if (!isoString) return "N/A"; // ถ้าไม่มีค่าวันที่ ให้แสดง "N/A"
@@ -314,9 +309,9 @@ const Lcardinfo: React.FC = () => {
             </button>
           </div>
 
-          <div className="mr-41 bg-transparent w-2xl items-start">
+          <div className="mr-41 bg-r w-2xl items-start">
             {/* Horizontal Scrollable Frame - ย้ายขึ้นมาด้านบน */}
-            <div className="mt-14">
+            <div className="mt-10">
               {/* Scrollable Container */}
               <div
                 ref={scrollContainerRef}
@@ -330,39 +325,43 @@ const Lcardinfo: React.FC = () => {
                 {paginatedMeasurements.map((page, pageIndex) => (
                   <div
                     key={pageIndex}
-                    className="bg-transparent p-3 flex-shrink-0 snap-center"
+                    className="bg-transparent p-3 flex-shrink-0 snap-center min-w-full"
+                    style={{ width: "480px" }}
                   >
-                    {page.map((measurement, index) => {
-                      const scaleSetIndex = index % scaleColorSets.length;
-                      const scaleSet = scaleColorSets[scaleSetIndex] ?? {
-                        colors: [],
-                        values: [],
-                      };
+                    {/* แสดง Scale แบบแนวตั้ง (8 items per page) */}
+                    <div className="flex flex-col space-y-3 w-full">
+                      {page.map((measurement, index) => {
+                        const scaleSetIndex = index % scaleColorSets.length;
+                        const scaleSet = scaleColorSets[scaleSetIndex] ?? {
+                          colors: [],
+                          values: [],
+                        };
 
-                      return (
-                        <Scale
-                          key={index}
-                          name={measurement.name}
-                          concentration={measurement.unit}
-                          value={parseFloat(
-                            Number(measurement.value).toFixed(2)
-                          )}
-                          scaleColors={scaleSet.colors}
-                          scaleValues={scaleSet.values}
-                          normalRange={measurement.normalRange} // <- เพิ่มตรงนี้!
-                        />
-                      );
-                    })}
+                        return (
+                          <Scale
+                            key={index}
+                            name={measurement.name}
+                            concentration={measurement.unit}
+                            value={parseFloat(
+                              Number(measurement.value).toFixed(2)
+                            )}
+                            scaleColors={scaleSet.colors}
+                            scaleValues={scaleSet.values}
+                            normalRange={measurement.normalRange}
+                          />
+                        );
+                      })}
+                    </div>
                   </div>
                 ))}
               </div>
 
               {/* Pagination Dots */}
-              <div className="flex flex-col items-center space-x-2 mt-4">
+              <div className="flex flex-row items-center justify-center space-x-2 mt-4">
                 {paginatedMeasurements.map((_, index) => (
                   <div
                     key={index}
-                    className={`w-2 h-2 rounded-full cursor-pointer ${
+                    className={`w-2 h-2 rounded-full cursor-pointer transition-colors duration-200${
                       index === currentPage ? "bg-black" : "bg-gray-300"
                     }`}
                     onClick={() => handleDotClick(index)}
@@ -370,13 +369,6 @@ const Lcardinfo: React.FC = () => {
                 ))}
               </div>
             </div>
-
-            {/* Quality Message - ย้ายมาอยู่ฝั่งขวาล่าง หลัง Horizontal Scrollable Frame */}
-            {/* <div className="bg-transparent mt-8 rounded-lg max-h-64 overflow-y-auto">
-              <div className="text-base text-black whitespace-pre-wrap break-words">
-                {qualityMessage}
-              </div>
-            </div> */}
           </div>
         </div>
       </div>
