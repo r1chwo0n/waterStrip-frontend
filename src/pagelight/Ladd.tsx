@@ -247,16 +247,16 @@ const Ladd: React.FC = () => {
     if (isLocationSelected && selectedFile && selectedBrandId) {
       try {
 
-        navigate("/loading");
-        // 1️⃣ อัปโหลดภาพไปยัง Cloudinary
+        // navigate("/loading");
+        // อัปโหลดภาพไปยัง Cloudinary
         const cloudinaryUrl = await uploadToCloudinary(selectedFile);
 
-        // 2️⃣ แปลงพิกัดจาก DMS → Decimal
+        // แปลงพิกัดจาก DMS → Decimal
         const locationParts = location.split(", ");
         const latitude = locationParts[0];
         const longitude = locationParts[1];
 
-        // 3️⃣ ส่งทุกอย่างไปยัง backend เพื่อให้มันเรียก ML + Insert DB + Evaluate
+        // ส่งทุกอย่างไปยัง backend เพื่อให้มันเรียก ML + Insert DB + Evaluate
         const saveRes = await api.post<StripResponse>("/api/strips", {
           b_id: selectedBrandId,
           s_latitude: latitude,
