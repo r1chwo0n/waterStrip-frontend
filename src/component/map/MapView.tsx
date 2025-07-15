@@ -13,6 +13,7 @@ import type {
 import { dmsToDecimal } from "../../utils/dmsToDecimal.ts";
 import { DateAnalyzer } from "../Convertor/DateAnalyzer";
 import { LatLngBoundsExpression } from "leaflet";
+import { apiFetch } from "../../api.ts";
 
 const thailandProvincesGeoJSON = rawGeoJson as FeatureCollection;
 
@@ -76,7 +77,7 @@ const MapView = () => {
   useEffect(() => {
     const fetchPlacesData = async () => {
       try {
-        const stripsResponse = await fetch("/api/strips");
+        const stripsResponse = await apiFetch("/api/strips");
         const stripsData = await stripsResponse.json();
         const ThisMontStrip = DateAnalyzer(stripsData);
         setStrips(ThisMontStrip);

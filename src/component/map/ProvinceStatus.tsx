@@ -38,7 +38,7 @@ const ProvinceStatus = () => {
   useEffect(() => {
     const fetchPublicStrips = async () => {
       try {
-        const res = await apiFetch("/api/strip-status/public"); // ✅ เรียกเฉพาะ public
+        const res = await apiFetch("/api/strip-status/public"); 
         const data: PublicStrip[] = await res.json();
 
         // Filter strips for this month
