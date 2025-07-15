@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import { fetchPlaces } from "../../utils/fetchPlaces";
+import ChangeView from "./ChangeView";
 import "leaflet/dist/leaflet.css";
 import rawGeoJson from "./thailand-provinces.json";
 import * as turf from "@turf/turf";
@@ -10,46 +11,22 @@ import type {
   Polygon,
   MultiPolygon,
 } from "geojson";
-import { dmsToDecimal } from "../../utils/dmsToDecimal.ts";
+import { dmsToDecimal } from "../../utils/dmsToDecimal.ts"; // Assuming you have a utility function for DMS conversion
 import { DateAnalyzer } from "../Convertor/DateAnalyzer";
-import { LatLngBoundsExpression } from "leaflet";
 import { apiFetch } from "../../api.ts";
 
 const thailandProvincesGeoJSON = rawGeoJson as FeatureCollection;
-
-// ขอบเขตประเทศไทย
-const THAILAND_BOUNDS: LatLngBoundsExpression = [
-  [5.610833, 97.344167], // SW
-  [20.463056, 105.637222], // NE
-];
-
-// ฟังก์ชันสำหรับซูมเข้าที่ผู้ใช้ (เมื่อได้ตำแหน่ง)
-const FlyToUserLocation = ({
-  position,
-}: {
-  position: [number, number] | null;
-}) => {
-  const map = useMap();
-
-  useEffect(() => {
-    if (position) {
-      map.setView(position, 13, { animate: true }); 
-    }
-  }, [position]);
-
-  return null;
-};
+const DEFAULT_POSITION: [number, number] = [18.796143, 98.979263]; // Chiang Mai
 
 const MapView = () => {
-  const [userPosition, setUserPosition] = useState<[number, number] | null>(
-    null
-  );
+  const [center, setCenter] = useState<[number, number]>(DEFAULT_POSITION);
   const [strips, setStrips] = useState<any[]>([]);
   const [provinceColors, setProvinceColors] = useState<Record<string, string>>(
     {}
   );
   const [_, setPlaces] = useState<any[]>([]);
 
+  // Utility to get province name from coordinates
   const getProvinceFromLatLng = (
     lat: number,
     lng: number,
@@ -74,6 +51,7 @@ const MapView = () => {
     return null;
   };
 
+  // Fetch places and strips data
   useEffect(() => {
     const fetchPlacesData = async () => {
       try {
@@ -90,23 +68,32 @@ const MapView = () => {
     fetchPlacesData();
   }, []);
 
+  // Analyze strip data to assign colors to provinces
   useEffect(() => {
     if (!strips.length) return;
 
+    const stripsThisMonth = strips;
+
+    console.log("Strips from current month:", stripsThisMonth);
+
     const colorCountMap: Record<string, Record<string, number>> = {};
 
-    for (const strip of strips) {
+    for (const strip of stripsThisMonth) {
       const lat = dmsToDecimal(strip.s_latitude);
       const lng = dmsToDecimal(strip.s_longitude);
       const color = strip.s_qualitycolor;
+
       const province = getProvinceFromLatLng(
         lat,
         lng,
         thailandProvincesGeoJSON
       );
+
       if (!province) continue;
 
-      if (!colorCountMap[province]) colorCountMap[province] = {};
+      if (!colorCountMap[province]) {
+        colorCountMap[province] = {};
+      }
       colorCountMap[province][color] =
         (colorCountMap[province][color] || 0) + 1;
     }
@@ -123,27 +110,34 @@ const MapView = () => {
     setProvinceColors(mostCommonColorByProvince);
   }, [strips]);
 
+  // Popup on each province
   const onEachProvince = (province: GeoJSON.Feature, layer: L.Layer) => {
     if (province.properties && (province.properties as any).NAME_1) {
       layer.bindPopup((province.properties as any).NAME_1);
     }
   };
 
+  // Get user's geolocation
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          setUserPosition([latitude, longitude]);
+          setCenter([latitude, longitude]);
         },
         (error) => {
           console.warn("ไม่สามารถเข้าถึงตำแหน่งได้:", error.message);
+          setCenter(DEFAULT_POSITION);
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
+    } else {
+      console.warn("เบราว์เซอร์ไม่รองรับ geolocation");
+      setCenter(DEFAULT_POSITION);
     }
   }, []);
 
+  // Fetch additional place info (if needed)
   useEffect(() => {
     const fetchData = async () => {
       const data = await fetchPlaces();
@@ -154,7 +148,8 @@ const MapView = () => {
 
   return (
     <MapContainer
-      bounds={THAILAND_BOUNDS}
+      center={center}
+      zoom={13}
       scrollWheelZoom={true}
       style={{ height: "100%", width: "100%" }}
     >
@@ -162,7 +157,7 @@ const MapView = () => {
         attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {userPosition && <FlyToUserLocation position={userPosition} />}
+      <ChangeView center={center} />
       <GeoJSON
         data={thailandProvincesGeoJSON}
         style={(feature) => {
