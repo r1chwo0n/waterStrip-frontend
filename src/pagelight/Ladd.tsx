@@ -250,11 +250,13 @@ const Ladd: React.FC = () => {
         // navigate("/loading");
         // อัปโหลดภาพไปยัง Cloudinary
         const cloudinaryUrl = await uploadToCloudinary(selectedFile);
+        console.log(cloudinaryUrl)
 
         // แปลงพิกัดจาก DMS → Decimal
         const locationParts = location.split(", ");
         const latitude = locationParts[0];
         const longitude = locationParts[1];
+        console.log(latitude, longitude)
 
         // ส่งทุกอย่างไปยัง backend เพื่อให้มันเรียก ML + Insert DB + Evaluate
         const saveRes = await api.post<StripResponse>("/api/strips", {
